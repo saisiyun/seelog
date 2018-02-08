@@ -38,15 +38,17 @@ type DataPusherWriter struct {
 	Desc      string
 	Event     string
 	Url       string
+	Identify  string
 }
 
 // Creates a new console writer. Returns error, if the console writer couldn't be created.
-func NewDataPusherWriter(accessKey string, desc string, event string, url string) *DataPusherWriter {
+func NewDataPusherWriter(accessKey string, desc string, event string, url string, identify string) *DataPusherWriter {
 	newWriter := new(DataPusherWriter)
 	newWriter.AccessKey = accessKey
 	newWriter.Desc = desc
 	newWriter.Event = event
 	newWriter.Url = url
+	newWriter.Identify = identify
 	return newWriter
 }
 
@@ -59,6 +61,7 @@ func (datapusher *DataPusherWriter) Write(bytes []byte) (int, error) {
 func (datapusher *DataPusherWriter) postDate(content string) error {
 	postdata := make(map[string]interface{})
 	postdata["desc"] = datapusher.Desc
+	postdata["identify"] = datapusher.Identify
 	postdata["content"] = content
 
 	bytesData, err := json.Marshal(postdata)
