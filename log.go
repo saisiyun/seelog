@@ -280,7 +280,6 @@ func Error(v ...interface{}) error {
 	pkgOperationsMutex.Lock()
 	defer pkgOperationsMutex.Unlock()
 	message := newLogMessage(v)
-	fmt.Println(v)
 	Current.errorWithCallDepth(staticFuncCallDepth, message)
 	return errors.New(message.String())
 }

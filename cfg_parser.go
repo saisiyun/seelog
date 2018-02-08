@@ -54,6 +54,10 @@ const (
 	pathID                           = "path"
 	fileWriterID                     = "file"
 	smtpWriterID                     = "smtp"
+	datapusherWriterID               = "datapusher"
+	datapusherAccessKey              = "accesskey"
+	datapusherDesc                   = "desc"
+	datapusherEvent                  = "event"
 	senderaddressID                  = "senderaddress"
 	senderNameID                     = "sendername"
 	recipientID                      = "recipient"
@@ -154,6 +158,7 @@ func init() {
 		bufferedWriterID:     {createbufferedWriter},
 		smtpWriterID:         {createSMTPWriter},
 		connWriterID:         {createconnWriter},
+		datapusherWriterID:   {createDataPusherWriter},
 	}
 
 	err := fillPredefinedFormats()
@@ -622,6 +627,7 @@ func getCurrentFormat(node *xmlNode, formatFromParent *formatter, formats map[st
 
 func createInnerReceivers(node *xmlNode, format *formatter, formats map[string]*formatter, cfg *CfgParseParams) ([]interface{}, error) {
 	var outputs []interface{}
+	fmt.Println(elementMap)
 	for _, childNode := range node.children {
 		entry, ok := elementMap[childNode.name]
 		if !ok {
@@ -886,6 +892,37 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 	)
 
 	return NewFormattedWriter(smtpWriter, currentFormat)
+}
+
+// Creates new DataPusher writer if encountered in the config file.
+func createDataPusherWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
+	err := checkUnexpectedAttribute(node, datapusherAccessKey, datapusherDesc, datapusherEvent)
+	if err != nil {
+		return nil, err
+	}
+	currentFormat, err := getCurrentFormat(node, formatFromParent, formats)
+	if err != nil {
+		return nil, err
+	}
+	accessKey, ok := node.attributes[datapusherAccessKey]
+	if !ok {
+		return nil, newMissingArgumentError(node.name, datapusherAccessKey)
+	}
+	desc, ok := node.attributes[datapusherDesc]
+	if !ok {
+		return nil, newMissingArgumentError(node.name, datapusherDesc)
+	}
+	event, ok := node.attributes[datapusherEvent]
+	if !ok {
+		return nil, newMissingArgumentError(node.name, datapusherEvent)
+	}
+
+	dpWriter := NewDataPusherWriter(
+		accessKey,
+		desc,
+		event,
+	)
+	return NewFormattedWriter(dpWriter, currentFormat)
 }
 
 func createConsoleWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
