@@ -37,14 +37,16 @@ type DataPusherWriter struct {
 	AccessKey string
 	Desc      string
 	Event     string
+	Url       string
 }
 
 // Creates a new console writer. Returns error, if the console writer couldn't be created.
-func NewDataPusherWriter(accessKey string, desc string, event string) *DataPusherWriter {
+func NewDataPusherWriter(accessKey string, desc string, event string, url string) *DataPusherWriter {
 	newWriter := new(DataPusherWriter)
 	newWriter.AccessKey = accessKey
 	newWriter.Desc = desc
 	newWriter.Event = event
+	newWriter.Url = url
 	return newWriter
 }
 
@@ -67,7 +69,11 @@ func (datapusher *DataPusherWriter) postDate(content string) error {
 	client := &http.Client{
 		Timeout: 3 * time.Second,
 	}
-	invokeUrl := fmt.Sprintf("http://123.207.72.235:3000/v1/project/%s/events/%s", datapusher.AccessKey, datapusher.Event)
+	host := "http://123.207.72.235:3000"
+	if datapusher.Url != "" {
+		host = datapusher.Url
+	}
+	invokeUrl := fmt.Sprintf("%s/v1/project/%s/events/%s", host, datapusher.AccessKey, datapusher.Event)
 	req, err := http.NewRequest("POST", invokeUrl, bytes.NewBuffer(bytesData))
 	if err != nil {
 		return err

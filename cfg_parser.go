@@ -58,6 +58,7 @@ const (
 	datapusherAccessKey              = "accesskey"
 	datapusherDesc                   = "desc"
 	datapusherEvent                  = "event"
+	datapusherUrl                    = "url"
 	senderaddressID                  = "senderaddress"
 	senderNameID                     = "sendername"
 	recipientID                      = "recipient"
@@ -896,7 +897,7 @@ func createSMTPWriter(node *xmlNode, formatFromParent *formatter, formats map[st
 
 // Creates new DataPusher writer if encountered in the config file.
 func createDataPusherWriter(node *xmlNode, formatFromParent *formatter, formats map[string]*formatter, cfg *CfgParseParams) (interface{}, error) {
-	err := checkUnexpectedAttribute(node, datapusherAccessKey, datapusherDesc, datapusherEvent)
+	err := checkUnexpectedAttribute(node, datapusherAccessKey, datapusherDesc, datapusherEvent, datapusherUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -916,11 +917,13 @@ func createDataPusherWriter(node *xmlNode, formatFromParent *formatter, formats 
 	if !ok {
 		return nil, newMissingArgumentError(node.name, datapusherEvent)
 	}
+	url, _ := node.attributes[datapusherUrl]
 
 	dpWriter := NewDataPusherWriter(
 		accessKey,
 		desc,
 		event,
+		url,
 	)
 	return NewFormattedWriter(dpWriter, currentFormat)
 }
